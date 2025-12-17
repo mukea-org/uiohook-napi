@@ -8,16 +8,19 @@ jobs:
   prebuild-windows:
     runs-on: windows-2019
     steps:
-    - uses: actions/checkout@v4  # 升级到 v4
+    - uses: actions/checkout@v4
       with:
         submodules: true
-    - uses: actions/setup-node@v4 # 升级到 v4
+    - uses: actions/setup-node@v4
     - run: npm install --global node-gyp
     - run: yarn apply-libuiohook-patch
-    - run: yarn --frozen-lockfile
+    
+    # 👇 修改这里：加上 --ignore-scripts
+    - run: yarn --frozen-lockfile --ignore-scripts
+    
     - run: yarn prebuild --arch x64
     # - run: yarn prebuild --arch arm64
-    - uses: actions/upload-artifact@v4 # 必须升级到 v4
+    - uses: actions/upload-artifact@v4
       with:
         name: windows
         path: prebuilds
