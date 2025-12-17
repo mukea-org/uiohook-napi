@@ -31,7 +31,9 @@ jobs:
     - uses: actions/checkout@v4 # 升级到 v4
       with:
         submodules: true
-    - uses: actions/setup-node@v4 # 升级到 v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18.20.8'
     - run: |
         sudo apt-get update
         sudo apt-get install -y libxrandr-dev libxtst-dev
