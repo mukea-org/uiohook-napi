@@ -2,100 +2,128 @@ name: Prebuild
 
 on:
   push:
-  workflow_dispatch: # 保留这个以便你可以手动点击运行
+  workflow_dispatch:
+concurrency:
+  group: prebuild-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   prebuild-windows:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - uses: actions/setup-node@v4
-    - run: npm install --global node-gyp
-    - run: yarn apply-libuiohook-patch
-    
-    # 👇 修改这里：加上 --ignore-scripts
-    - run: yarn --frozen-lockfile --ignore-scripts
-    
-    - run: yarn prebuild --arch x64
-    # - run: yarn prebuild --arch arm64
-    - uses: actions/upload-artifact@v4
-      with:
-        name: windows
-        path: prebuilds
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - run: npm install -g node-gyp
+
+      - run: yarn apply-libuiohook-patch
+
+      - run: yarn --frozen-lockfile --ignore-scripts
+
+      - run: yarn prebuild --arch x64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: prebuilds
+
 
   prebuild-linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4 # 升级到 v4
-      with:
-        submodules: true
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '18.20.8'
-    - run: |
-        sudo apt-get update
-        sudo apt-get install -y libxrandr-dev libxtst-dev
-    - run: yarn apply-libuiohook-patch
-    - run: yarn --frozen-lockfile
-    - run: yarn prebuild --arch x64
-    - run: yarn prebuild --arch arm64
-    - uses: actions/upload-artifact@v4 # 必须升级到 v4
-      with:
-        name: linux
-        path: prebuilds
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxrandr-dev \
+            libxtst-dev \
+            libxi-dev \
+            libxinerama-dev
+
+      - run: yarn apply-libuiohook-patch
+
+      - run: yarn --frozen-lockfile
+
+      - run: yarn prebuild --arch x64
+      - run: yarn prebuild --arch arm64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: prebuilds
+
 
   prebuild-darwin:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
-    - uses: actions/checkout@v4 # 升级到 v4
-      with:
-        submodules: true
-    - uses: actions/setup-node@v4 # 升级到 v4
-    - run: yarn apply-libuiohook-patch
-    - run: yarn --frozen-lockfile
-    - run: yarn prebuild --arch x64
-    - run: yarn prebuild --arch arm64
-    - uses: actions/upload-artifact@v4 # 必须升级到 v4
-      with:
-        name: darwin
-        path: prebuilds
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - run: yarn apply-libuiohook-patch
+
+      - run: yarn --frozen-lockfile
+
+      - run: yarn prebuild --arch x64
+      - run: yarn prebuild --arch arm64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: darwin
+          path: prebuilds
+
 
   build-package:
     needs:
-    - prebuild-windows
-    - prebuild-linux
-    - prebuild-darwin
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4 # 升级到 v4
-      with:
-        submodules: true
-    
-    # 下载步骤也要全部升级到 v4
-    # 注意：v4 的 merge 行为有所不同，但对于这里指定 path 的情况通常兼容
-    - uses: actions/download-artifact@v4 
-      with:
-        name: windows
-        path: prebuilds
-    - uses: actions/download-artifact@v4
-      with:
-        name: linux
-        path: prebuilds
-    - uses: actions/download-artifact@v4
-      with:
-        name: darwin
-        path: prebuilds
+      - prebuild-windows
+      - prebuild-linux
+      - prebuild-darwin
 
-    - uses: actions/setup-node@v4 # 升级到 v4
-    - run: yarn apply-libuiohook-patch
-    - run: yarn --frozen-lockfile --ignore-scripts
-    - run: yarn tsc
-    - run: npm pack
-    
-    - uses: actions/upload-artifact@v4 # 必须升级到 v4
-      with:
-        name: package
-        path: uiohook-napi-*.tgz
-        retention-days: 3
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: prebuilds
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - run: yarn apply-libuiohook-patch
+
+      - run: yarn --frozen-lockfile --ignore-scripts
+
+      - run: yarn build-ts
+
+      - run: npm pack
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: uiohook-napi-*.tgz
+          retention-days: 3

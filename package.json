@@ -38,10 +38,10 @@
     "prebuilds"
   ],
   "devDependencies": {
-    "@types/node": "18.x.x",
+    "@types/node": "^20.11.30",
     "prebuildify": "^6.0.1",
-    "ts-node": "10.x.x",
-    "typescript": "4.x.x"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "node-gyp-build": "4.x.x"
@@ -51,6 +51,6 @@
   },
   "gypfile": true,
   "engines": {
-    "node": ">= 16"
+    "node": ">=18"
   }
 }
