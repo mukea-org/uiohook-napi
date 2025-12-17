@@ -1,23 +1,23 @@
 name: Prebuild
 
 on:
-  push:               # 保留这个，推送时依然自动跑
-  workflow_dispatch:  # <--- 加上这一行！这意味着“允许手动触发”
+  push:
+  workflow_dispatch: # 保留这个以便你可以手动点击运行
 
 jobs:
   prebuild-windows:
     runs-on: windows-2019
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4  # 升级到 v4
       with:
         submodules: true
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4 # 升级到 v4
     - run: npm install --global node-gyp
     - run: yarn apply-libuiohook-patch
     - run: yarn --frozen-lockfile
     - run: yarn prebuild --arch x64
     # - run: yarn prebuild --arch arm64
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4 # 必须升级到 v4
       with:
         name: windows
         path: prebuilds
@@ -25,10 +25,10 @@ jobs:
   prebuild-linux:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4 # 升级到 v4
       with:
         submodules: true
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4 # 升级到 v4
     - run: |
         sudo apt-get update
         sudo apt-get install -y libxrandr-dev libxtst-dev
@@ -36,7 +36,7 @@ jobs:
     - run: yarn --frozen-lockfile
     - run: yarn prebuild --arch x64
     - run: yarn prebuild --arch arm64
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4 # 必须升级到 v4
       with:
         name: linux
         path: prebuilds
@@ -44,15 +44,15 @@ jobs:
   prebuild-darwin:
     runs-on: macos-12
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4 # 升级到 v4
       with:
         submodules: true
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4 # 升级到 v4
     - run: yarn apply-libuiohook-patch
     - run: yarn --frozen-lockfile
     - run: yarn prebuild --arch x64
     - run: yarn prebuild --arch arm64
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4 # 必须升级到 v4
       with:
         name: darwin
         path: prebuilds
@@ -64,27 +64,32 @@ jobs:
     - prebuild-darwin
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4 # 升级到 v4
       with:
         submodules: true
-    - uses: actions/download-artifact@v3
+    
+    # 下载步骤也要全部升级到 v4
+    # 注意：v4 的 merge 行为有所不同，但对于这里指定 path 的情况通常兼容
+    - uses: actions/download-artifact@v4 
       with:
         name: windows
         path: prebuilds
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: linux
         path: prebuilds
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: darwin
         path: prebuilds
-    - uses: actions/setup-node@v3
+
+    - uses: actions/setup-node@v4 # 升级到 v4
     - run: yarn apply-libuiohook-patch
     - run: yarn --frozen-lockfile --ignore-scripts
     - run: yarn tsc
     - run: npm pack
-    - uses: actions/upload-artifact@v3
+    
+    - uses: actions/upload-artifact@v4 # 必须升级到 v4
       with:
         name: package
         path: uiohook-napi-*.tgz
