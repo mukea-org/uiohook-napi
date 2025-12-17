@@ -18,6 +18,9 @@
     "keyboard",
     "mouse"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
