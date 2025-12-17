@@ -12,8 +12,6 @@ jobs:
   prebuild-windows:
     runs-on: windows-2022
     steps:
-      - run: node -v
-      - run: pnpm -v
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -22,18 +20,16 @@ jobs:
         with:
           node-version: 20
 
-      # 使用 pnpm 官方的安装 action
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
 
-      # 这一步可以省略，因为 pnpm overrides 已经处理了 node-gyp 版本
-      # - run: pnpm add -g node-gyp
+      - run: node -v
+      - run: pnpm -v
 
       - run: pnpm apply-libuiohook-patch
       - name: Clear pnpm cache
         run: pnpm store prune
-      # 使用 pnpm install
       - run: pnpm install --frozen-lockfile --ignore-scripts
 
       - run: pnpm prebuild --arch x64
@@ -46,8 +42,6 @@ jobs:
   prebuild-linux:
     runs-on: ubuntu-22.04
     steps:
-      - run: node -v
-      - run: pnpm -v
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -59,6 +53,9 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
+
+      - run: node -v
+      - run: pnpm -v
 
       - run: |
           sudo apt-get update
@@ -84,8 +81,6 @@ jobs:
   prebuild-darwin:
     runs-on: macos-latest
     steps:
-      - run: node -v
-      - run: pnpm -v
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -97,6 +92,9 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
+
+      - run: node -v
+      - run: pnpm -v
 
       - run: pnpm apply-libuiohook-patch
       - name: Clear pnpm cache
@@ -118,8 +116,6 @@ jobs:
       - prebuild-darwin
     runs-on: ubuntu-22.04
     steps:
-      - run: node -v
-      - run: pnpm -v
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -135,6 +131,9 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
+
+      - run: node -v
+      - run: pnpm -v
 
       - run: pnpm apply-libuiohook-patch
       - name: Clear pnpm cache
