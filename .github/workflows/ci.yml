@@ -30,10 +30,11 @@ jobs:
       # - run: pnpm add -g node-gyp
 
       - run: pnpm apply-libuiohook-patch
+      - name: Clear pnpm cache
+        run: pnpm store prune
       # 使用 pnpm install
-      - run: pnpm install --ignore-scripts
-      - run: git diff pnpm-lock.yaml
-
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      
       - run: pnpm prebuild --arch x64
       
       - uses: actions/upload-artifact@v4
@@ -66,6 +67,8 @@ jobs:
             libxinerama-dev
 
       - run: pnpm apply-libuiohook-patch
+      - name: Clear pnpm cache
+        run: pnpm store prune
       - run: pnpm install --frozen-lockfile
       
       - run: pnpm prebuild --arch x64
@@ -93,6 +96,8 @@ jobs:
           run_install: false
 
       - run: pnpm apply-libuiohook-patch
+      - name: Clear pnpm cache
+        run: pnpm store prune
       - run: pnpm install --frozen-lockfile
       
       - run: pnpm prebuild --arch x64
@@ -128,9 +133,9 @@ jobs:
           run_install: false
 
       - run: pnpm apply-libuiohook-patch
-      - run: pnpm install --ignore-scripts
-      - run: git diff pnpm-lock.yaml
-
+      - name: Clear pnpm cache
+        run: pnpm store prune
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm build-ts
       - run: npm pack
       
