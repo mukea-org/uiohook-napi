@@ -1,14 +1,14 @@
-# uiohook-napi
+# @mukea/uiohook-napi
 
-[![](https://img.shields.io/npm/v/uiohook-napi/latest?color=CC3534&label=uiohook-napi&logo=npm&labelColor=212121)](https://www.npmjs.com/package/uiohook-napi)
+[![npm version](https://img.shields.io/npm/v/@mukea/uiohook-napi/latest?color=CC3534&label=@mukea/uiohook-napi&logo=npm&labelColor=212121)](https://www.npmjs.com/package/@mukea/uiohook-napi)
+[![GitHub repository](https://img.shields.io/badge/GitHub-mukea--org/uiohook--napi-blue?logo=github)](https://github.com/mukea-org/uiohook-napi)
 
-N-API C-bindings for [libuiohook](https://github.com/kwhat/libuiohook).
-
+N-API C-bindings for [libuiohook](https://github.com/kwhat/libuiohook), available at the [@mukea](https://www.npmjs.com/org/mukea) scope.
 
 ### Usage example
 
 ```typescript
-import { uIOhook, UiohookKey } from 'uiohook-napi'
+import { uIOhook, UiohookKey } from '@mukea/uiohook-napi'
 
 uIOhook.on('keydown', (e) => {
   if (e.keycode === UiohookKey.Q) {
@@ -28,19 +28,15 @@ uIOhook.start()
 ```typescript
 interface UiohookNapi {
   on(event: 'input', listener: (e: UiohookKeyboardEvent | UiohookMouseEvent | UiohookWheelEvent) => void): this
-
   on(event: 'keydown', listener: (e: UiohookKeyboardEvent) => void): this
   on(event: 'keyup', listener: (e: UiohookKeyboardEvent) => void): this
-
   on(event: 'mousedown', listener: (e: UiohookMouseEvent) => void): this
   on(event: 'mouseup', listener: (e: UiohookMouseEvent) => void): this
   on(event: 'mousemove', listener: (e: UiohookMouseEvent) => void): this
   on(event: 'click', listener: (e: UiohookMouseEvent) => void): this
-
   on(event: 'wheel', listener: (e: UiohookWheelEvent) => void): this
-
-  keyTap(key: keycode, modifiers?: keycode[])
-  keyToggle(key: keycode, toggle: 'down' | 'up')
+  keyTap(key: keycode, modifiers?: keycode[]): void
+  keyToggle(key: keycode, toggle: 'down' | 'up'): void
 }
 
 export interface UiohookKeyboardEvent {
