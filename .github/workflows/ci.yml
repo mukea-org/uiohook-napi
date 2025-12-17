@@ -33,8 +33,9 @@ jobs:
       - name: Clear pnpm cache
         run: pnpm store prune
       # 使用 pnpm install
-      - run: pnpm install --frozen-lockfile --ignore-scripts
-      
+      - run: pnpm install --ignore-scripts
+      - run: git diff pnpm-lock.yaml
+
       - run: pnpm prebuild --arch x64
       
       - uses: actions/upload-artifact@v4
@@ -135,7 +136,9 @@ jobs:
       - run: pnpm apply-libuiohook-patch
       - name: Clear pnpm cache
         run: pnpm store prune
-      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm install --ignore-scripts
+      - run: git diff pnpm-lock.yaml
+
       - run: pnpm build-ts
       - run: npm pack
       
