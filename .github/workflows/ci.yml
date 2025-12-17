@@ -27,6 +27,7 @@ jobs:
       - run: node -v
       - run: pnpm -v
 
+      - run: pnpm apply-libuiohook-patch
       - name: Clear pnpm cache
         run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
@@ -64,6 +65,7 @@ jobs:
             libxi-dev \
             libxinerama-dev
 
+      - run: pnpm apply-libuiohook-patch
       - name: Clear pnpm cache
         run: pnpm store prune
       - run: pnpm install --frozen-lockfile
@@ -94,6 +96,7 @@ jobs:
       - run: node -v
       - run: pnpm -v
 
+      - run: pnpm apply-libuiohook-patch
       - name: Clear pnpm cache
         run: pnpm store prune
       - run: pnpm install --frozen-lockfile
@@ -132,6 +135,7 @@ jobs:
       - run: node -v
       - run: pnpm -v
 
+      - run: pnpm apply-libuiohook-patch
       - name: Clear pnpm cache
         run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
