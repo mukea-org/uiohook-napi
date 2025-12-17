@@ -1,12 +1,12 @@
 {
-  "name": "uiohook-napi",
+  "name": "@mukea/uiohook-napi",
   "version": "1.5.4",
   "author": {
-    "name": "Alexander Drozdov"
+    "name": "mukea.cc"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/SnosMe/uiohook-napi.git"
+    "url": "https://github.com/mukea-org/uiohook-napi"
   },
   "license": "MIT",
   "keywords": [
@@ -22,7 +22,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "install": "node-gyp-build",
-    "prebuild": "prebuildify --napi",
+    "prepublishOnly": "npm run build-ts && npm run prebuild",
     "build-ts": "tsc",
     "demo": "ts-node src/demo.ts",
     "make-libuiohook-patch": "git -C ./libuiohook diff --cached > ./src/libuiohook.patch",
