@@ -12,6 +12,8 @@ jobs:
   prebuild-windows:
     runs-on: windows-2022
     steps:
+      - run: node -v
+      - run: pnpm -v
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -19,11 +21,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      
+
       # 使用 pnpm 官方的安装 action
       - uses: pnpm/action-setup@v4
         with:
-          version: 8 # 或者你使用的 pnpm 版本
           run_install: false
 
       # 这一步可以省略，因为 pnpm overrides 已经处理了 node-gyp 版本
@@ -34,9 +35,9 @@ jobs:
         run: pnpm store prune
       # 使用 pnpm install
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      
+
       - run: pnpm prebuild --arch x64
-      
+
       - uses: actions/upload-artifact@v4
         with:
           name: windows
@@ -45,6 +46,8 @@ jobs:
   prebuild-linux:
     runs-on: ubuntu-22.04
     steps:
+      - run: node -v
+      - run: pnpm -v
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -55,9 +58,8 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 8
           run_install: false
-          
+
       - run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -70,10 +72,10 @@ jobs:
       - name: Clear pnpm cache
         run: pnpm store prune
       - run: pnpm install --frozen-lockfile
-      
+
       - run: pnpm prebuild --arch x64
       - run: pnpm prebuild --arch arm64
-      
+
       - uses: actions/upload-artifact@v4
         with:
           name: linux
@@ -82,6 +84,8 @@ jobs:
   prebuild-darwin:
     runs-on: macos-latest
     steps:
+      - run: node -v
+      - run: pnpm -v
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -92,17 +96,16 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 8
           run_install: false
 
       - run: pnpm apply-libuiohook-patch
       - name: Clear pnpm cache
         run: pnpm store prune
       - run: pnpm install --frozen-lockfile
-      
+
       - run: pnpm prebuild --arch x64
       - run: pnpm prebuild --arch arm64
-      
+
       - uses: actions/upload-artifact@v4
         with:
           name: darwin
@@ -115,6 +118,8 @@ jobs:
       - prebuild-darwin
     runs-on: ubuntu-22.04
     steps:
+      - run: node -v
+      - run: pnpm -v
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -129,7 +134,6 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 8
           run_install: false
 
       - run: pnpm apply-libuiohook-patch
@@ -138,7 +142,7 @@ jobs:
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm build-ts
       - run: npm pack
-      
+
       - uses: actions/upload-artifact@v4
         with:
           name: package

@@ -27,6 +27,7 @@
       "default": "./dist/index.js"
     }
   },
+  "packageManager": "pnpm@10.25.0",
   "scripts": {
     "install": "node-gyp-build",
     "prebuild": "prebuildify --napi",
