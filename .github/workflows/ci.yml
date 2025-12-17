@@ -3,6 +3,7 @@ name: Prebuild
 on:
   push:
   workflow_dispatch:
+
 concurrency:
   group: prebuild-${{ github.ref }}
   cancel-in-progress: true
@@ -18,21 +19,27 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
+      
+      # 使用 pnpm 官方的安装 action
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8 # 或者你使用的 pnpm 版本
+          run_install: false
 
-      - run: npm install -g node-gyp
+      # 这一步可以省略，因为 pnpm overrides 已经处理了 node-gyp 版本
+      # - run: pnpm add -g node-gyp
 
-      - run: yarn apply-libuiohook-patch
-
-      - run: yarn --frozen-lockfile --ignore-scripts
-
-      - run: yarn prebuild --arch x64
-
+      - run: pnpm apply-libuiohook-patch
+      
+      # 使用 pnpm install
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      
+      - run: pnpm prebuild --arch x64
+      
       - uses: actions/upload-artifact@v4
         with:
           name: windows
           path: prebuilds
-
 
   prebuild-linux:
     runs-on: ubuntu-22.04
@@ -44,8 +51,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
+          
       - run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -54,18 +65,17 @@ jobs:
             libxi-dev \
             libxinerama-dev
 
-      - run: yarn apply-libuiohook-patch
-
-      - run: yarn --frozen-lockfile
-
-      - run: yarn prebuild --arch x64
-      - run: yarn prebuild --arch arm64
-
+      - run: pnpm apply-libuiohook-patch
+      
+      - run: pnpm install --frozen-lockfile
+      
+      - run: pnpm prebuild --arch x64
+      - run: pnpm prebuild --arch arm64
+      
       - uses: actions/upload-artifact@v4
         with:
           name: linux
           path: prebuilds
-
 
   prebuild-darwin:
     runs-on: macos-latest
@@ -77,29 +87,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
 
-      - run: yarn apply-libuiohook-patch
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
 
-      - run: yarn --frozen-lockfile
-
-      - run: yarn prebuild --arch x64
-      - run: yarn prebuild --arch arm64
-
+      - run: pnpm apply-libuiohook-patch
+      
+      - run: pnpm install --frozen-lockfile
+      
+      - run: pnpm prebuild --arch x64
+      - run: pnpm prebuild --arch arm64
+      
       - uses: actions/upload-artifact@v4
         with:
           name: darwin
           path: prebuilds
-
 
   build-package:
     needs:
       - prebuild-windows
       - prebuild-linux
       - prebuild-darwin
-
     runs-on: ubuntu-22.04
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -112,16 +123,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
 
-      - run: yarn apply-libuiohook-patch
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
 
-      - run: yarn --frozen-lockfile --ignore-scripts
-
-      - run: yarn build-ts
-
+      - run: pnpm apply-libuiohook-patch
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm build-ts
       - run: npm pack
-
+      
       - uses: actions/upload-artifact@v4
         with:
           name: package

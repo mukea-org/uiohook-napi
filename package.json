@@ -59,5 +59,16 @@
   "gypfile": true,
   "engines": {
     "node": ">=18"
+  },
+  "overrides": {
+    "node-gyp": "^10.0.0"
+  },
+  "resolutions": {
+    "node-gyp": "^10.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "node-gyp": "^10.0.0"
+    }
   }
 }
