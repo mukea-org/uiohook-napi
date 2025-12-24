@@ -25,6 +25,7 @@ jobs:
           run_install: false
 
       - run: node -v
+      - run: node -p "process.versions.napi"
       - run: pnpm -v
 
       - run: pnpm apply-libuiohook-patch
@@ -55,6 +56,7 @@ jobs:
           run_install: false
 
       - run: node -v
+      - run: node -p "process.versions.napi"
       - run: pnpm -v
 
       - run: |
@@ -94,6 +96,7 @@ jobs:
           run_install: false
 
       - run: node -v
+      - run: node -p "process.versions.napi"
       - run: pnpm -v
 
       - run: pnpm apply-libuiohook-patch
@@ -133,6 +136,7 @@ jobs:
           run_install: false
 
       - run: node -v
+      - run: node -p "process.versions.napi"
       - run: pnpm -v
 
       - run: pnpm apply-libuiohook-patch

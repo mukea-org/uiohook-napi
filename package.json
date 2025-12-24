@@ -1,6 +1,6 @@
 {
   "name": "@mukea/uiohook-napi",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "author": {
     "name": "mukea.cc"
   },
@@ -61,6 +61,11 @@
   "engines": {
     "node": ">=18"
   },
+  "napi_versions": [
+    8,
+    9,
+    10
+  ],
   "overrides": {
     "node-gyp": "^10.0.0"
   },

@@ -11,6 +11,9 @@
       'include_dirs': [
         'libuiohook/include',
         'src/lib',
+      ],
+      'defines': [
+        'NAPI_VERSION=8'
       ]
     },
     {
