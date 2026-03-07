@@ -9,7 +9,7 @@ function loadNativeBinding (): AddonExports {
     throw new Error(
       'Failed to load @mukea/uiohook-napi native bindings. ' +
       'This package now expects prebuilt binaries to be shipped with the package. ' +
-      'If you are developing this repository locally, run `pnpm native:build` or `pnpm prebuild` first.' +
+      'If you are developing this repository locally, run `pnpm dev` or `node ./scripts/run-cmake-js.mjs build` first.' +
       details
     )
   }

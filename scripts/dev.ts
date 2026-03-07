@@ -1,12 +1,12 @@
-import { EventType, UiohookKey, type UiohookKeyboardEvent, uIOhook } from './'
+import { EventType, UiohookKey, type UiohookKeyboardEvent, uIOhook } from '../src'
 
 const keycodeMap = new Map<number, string>(
   Object.entries(UiohookKey).map(([name, code]) => [code, name])
 )
 
 function main () {
-  console.log('uIOhook keyboard demo started.')
-  console.log('Press keys in Windows. Press Esc to stop.')
+  console.log('uIOhook development listener started.')
+  console.log('Press keys to inspect events. Press Esc to stop.')
 
   uIOhook.on('keydown', (event) => {
     printKeyboardEvent(event)

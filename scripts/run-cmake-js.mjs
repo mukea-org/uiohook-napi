@@ -1,4 +1,5 @@
-import { existsSync } from 'node:fs'
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 
@@ -37,17 +38,27 @@ function runOnWindows(args) {
     ? args
     : [...args, '-G', 'Ninja']
 
-  return spawnSync('cmd.exe', ['/d', '/c', path.join(rootDir, 'scripts', 'run-cmake-js-win.cmd'), ...effectiveArgs], {
-    cwd: rootDir,
-    env: {
-      ...process.env,
-      UIOHOOK_NODE_EXE: process.execPath,
-      UIOHOOK_VCVARS64: toolchain.vcvars64,
-      UIOHOOK_CMAKE_BIN: toolchain.cmakeBin,
-      UIOHOOK_NINJA_DIR: toolchain.ninjaDir
-    },
-    stdio: 'inherit'
-  })
+  const tempDir = mkdtempSync(path.join(os.tmpdir(), 'uiohook-cmake-js-'))
+  const tempScript = path.join(tempDir, 'run-cmake-js.cmd')
+
+  writeFileSync(tempScript, [
+    '@echo off',
+    'setlocal EnableDelayedExpansion',
+    `call "${toolchain.vcvars64}" >nul`,
+    'if errorlevel 1 exit /b 1',
+    `set "PATH=${toolchain.cmakeBin};${toolchain.ninjaDir};!PATH!"`,
+    `"${process.execPath}" "${cmakeJsEntrypoint}" %*`
+  ].join('\r\n'))
+
+  try {
+    return spawnSync('cmd.exe', ['/d', '/c', tempScript, ...effectiveArgs.map(quoteForCmd)], {
+      cwd: rootDir,
+      env: process.env,
+      stdio: 'inherit'
+    })
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true })
+  }
 }
 
 function detectVisualStudioToolchain() {
@@ -93,4 +104,16 @@ function hasCommand(command) {
     stdio: 'ignore'
   })
   return probe.status === 0
+}
+
+function quoteForCmd(value) {
+  if (value.length === 0) {
+    return '""'
+  }
+
+  if (!/[ \t"&()^[\]{}=;!'+,`~]/.test(value)) {
+    return value
+  }
+
+  return `"${value.replace(/"/g, '""')}"`
 }

@@ -31,8 +31,8 @@ Use this to test the publish path before pushing a release tag.
 
 ```powershell
 pnpm install --ignore-scripts
-pnpm build-ts
-pnpm prebuild
+pnpm build
+node ./scripts/build-prebuild.mjs
 node ./scripts/verify-prebuilds.mjs
 npm pack
 npm publish --access public

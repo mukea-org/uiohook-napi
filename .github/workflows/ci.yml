@@ -31,7 +31,7 @@ jobs:
       - run: cmake --version
       - run: pnpm -v
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      - run: pnpm build-ts
+      - run: pnpm build
 
   prebuild-windows:
     runs-on: windows-2022
@@ -49,14 +49,13 @@ jobs:
 
       - run: node -v
       - run: cmake --version
-      - run: node -p "process.versions.napi"
       - run: pnpm -v
 
       - name: Clear pnpm cache
         run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - run: pnpm prebuild
+      - run: node ./scripts/build-prebuild.mjs
 
       - uses: actions/upload-artifact@v4
         with:
@@ -79,7 +78,6 @@ jobs:
 
       - run: node -v
       - run: cmake --version
-      - run: node -p "process.versions.napi"
       - run: pnpm -v
 
       - run: |
@@ -100,7 +98,7 @@ jobs:
         run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - run: pnpm prebuild
+      - run: node ./scripts/build-prebuild.mjs
 
       - uses: actions/upload-artifact@v4
         with:
@@ -123,14 +121,13 @@ jobs:
 
       - run: node -v
       - run: cmake --version
-      - run: node -p "process.versions.napi"
       - run: pnpm -v
 
       - name: Clear pnpm cache
         run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - run: pnpm prebuild
+      - run: node ./scripts/build-prebuild.mjs
 
       - uses: actions/upload-artifact@v4
         with:
@@ -163,13 +160,12 @@ jobs:
 
       - run: node -v
       - run: cmake --version
-      - run: node -p "process.versions.napi"
       - run: pnpm -v
 
       - name: Clear pnpm cache
         run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      - run: pnpm build-ts
+      - run: pnpm build
       - run: node ./scripts/verify-prebuilds.mjs
       - run: node -e "process.env.PREBUILDS_ONLY='1'; require('./dist/index.js')"
       - run: npm pack

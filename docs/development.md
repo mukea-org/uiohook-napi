@@ -47,27 +47,26 @@ sudo npm install -g pnpm@10.25.0
 
 ```powershell
 pnpm install --ignore-scripts
-pnpm build-ts
-pnpm native:build
-pnpm prebuild
+pnpm build
+pnpm dev
 ```
 
-Useful commands:
+Daily commands:
 
 ```powershell
-pnpm demo
-pnpm demo:keys
-pnpm pack:local
-pnpm sync:libuiohook
+pnpm build
+pnpm dev
 ```
 
-Windows keyboard hook smoke test:
+Release-only internal commands:
 
 ```powershell
-pnpm demo:keys
+node ./scripts/run-cmake-js.mjs build
+node ./scripts/build-prebuild.mjs
+node ./scripts/verify-prebuilds.mjs
 ```
 
-The demo prints `keydown`, `keypress`, and `keyup` events as you press keys.
+`pnpm dev` prints `keydown`, `keypress`, and `keyup` events as you press keys.
 Press `Esc` to stop the process.
 
 ## Repository layout

@@ -29,16 +29,9 @@
   },
   "packageManager": "pnpm@10.25.0",
   "scripts": {
-    "build": "pnpm build-ts",
-    "build-ts": "node ./scripts/build-ts.mjs",
-    "native:build": "node ./scripts/run-cmake-js.mjs build",
-    "native:clean": "node ./scripts/run-cmake-js.mjs clean",
-    "prebuild": "node ./scripts/build-prebuild.mjs",
-    "prepublishOnly": "pnpm build-ts && node ./scripts/verify-prebuilds.mjs",
-    "pack:local": "pnpm build-ts && pnpm prebuild && npm pack",
-    "demo": "ts-node src/demo.ts",
-    "demo:keys": "pnpm native:build && ts-node src/demo.ts",
-    "sync:libuiohook": "powershell -ExecutionPolicy Bypass -File ./scripts/sync-upstream.ps1"
+    "build": "node ./scripts/build-ts.mjs",
+    "dev": "node ./scripts/run-cmake-js.mjs build && ts-node ./scripts/dev.ts",
+    "prepack": "node ./scripts/build-ts.mjs && node ./scripts/verify-prebuilds.mjs"
   },
   "files": [
     "dist",
@@ -55,17 +48,5 @@
   },
   "engines": {
     "node": ">=20"
-  },
-  "binary": {
-    "napi_versions": [
-      8,
-      9,
-      10
-    ]
-  },
-  "napi_versions": [
-    8,
-    9,
-    10
-  ]
+  }
 }

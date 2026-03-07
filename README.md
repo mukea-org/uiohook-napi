@@ -11,16 +11,15 @@ This repository now vendors the `libuiohook` source directly. It no longer relie
 
 Consumers are expected to install prebuilt native binaries from npm. The package no longer performs install-time native compilation.
 
-Maintainers build native artifacts explicitly:
+For day-to-day work:
 
 ```powershell
 pnpm install --ignore-scripts
-pnpm build-ts
-pnpm native:build
-pnpm prebuild
+pnpm build
+pnpm dev
 ```
 
-The native build is now CMake-driven through `cmake-js`. See [development.md](./docs/development.md) for local setup and [UPSTREAM.md](./UPSTREAM.md) for vendored `libuiohook` maintenance rules.
+`pnpm build` produces the published JS output under `dist/`. `pnpm dev` builds the local native addon and starts the interactive hook listener for development and testing on Windows, Linux, and macOS. The native build is CMake-driven through `cmake-js`. See [development.md](./docs/development.md) for local setup and [UPSTREAM.md](./UPSTREAM.md) for vendored `libuiohook` maintenance rules.
 
 ## Usage example
 
