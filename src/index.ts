@@ -15,7 +15,12 @@ function loadNativeBinding (): AddonExports {
   }
 }
 
-const lib: AddonExports = loadNativeBinding()
+let nativeBinding: AddonExports | undefined
+
+function getNativeBinding (): AddonExports {
+  nativeBinding ??= loadNativeBinding()
+  return nativeBinding
+}
 
 interface AddonExports {
   start (cb: (e: any) => void): void
@@ -262,14 +267,17 @@ class UiohookNapi extends EventEmitter {
   }
 
   start () {
+    const lib = getNativeBinding()
     lib.start(this.handler.bind(this))
   }
 
   stop () {
+    const lib = getNativeBinding()
     lib.stop()
   }
 
   keyTap (key: number, modifiers: number[] = []) {
+    const lib = getNativeBinding()
     if (!modifiers.length) {
       lib.keyTap(key, KeyToggle.Tap)
       return
@@ -286,6 +294,7 @@ class UiohookNapi extends EventEmitter {
   }
 
   keyToggle (key: number, toggle: 'down' | 'up') {
+    const lib = getNativeBinding()
     lib.keyTap(key, (toggle === 'down' ? KeyToggle.Down : KeyToggle.Up))
   }
 }
