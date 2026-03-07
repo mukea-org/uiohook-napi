@@ -1,6 +1,6 @@
 {
   "name": "@mukea/uiohook-napi",
-  "version": "2.0.0-alpha1",
+  "version": "2.0.0-alpha2",
   "author": {
     "name": "mukea.cc"
   },
@@ -12,7 +12,6 @@
   "keywords": [
     "iohook",
     "uiohook",
-    "libuiohook",
     "hook",
     "input",
     "keyboard",

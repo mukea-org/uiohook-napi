@@ -25,6 +25,7 @@
 #endif
 #include <mach/mach_time.h>
 #ifdef USE_OBJC
+#include <objc/message.h>
 #include <objc/objc.h>
 #include <objc/objc-runtime.h>
 #endif
@@ -44,6 +45,22 @@ typedef struct _hook_info {
 
 #ifdef USE_OBJC
 static id auto_release_pool;
+
+static id objc_msg_send_id(id target, SEL selector) {
+	return ((id (*)(id, SEL)) objc_msgSend)(target, selector);
+}
+
+static id objc_msg_send_id_cgevent(id target, SEL selector, CGEventRef event_ref) {
+	return ((id (*)(id, SEL, CGEventRef)) objc_msgSend)(target, selector, event_ref);
+}
+
+static int objc_msg_send_int(id target, SEL selector) {
+	return ((int (*)(id, SEL)) objc_msgSend)(target, selector);
+}
+
+static void objc_msg_send_void(id target, SEL selector) {
+	((void (*)(id, SEL)) objc_msgSend)(target, selector);
+}
 #endif
 
 // Event runloop reference.
@@ -609,8 +626,8 @@ static inline void process_system_key(uint64_t timestamp, CGEventRef event_ref) 
 	if( CGEventGetType(event_ref) == NX_SYSDEFINED) {
 		#ifdef USE_OBJC
 		// Contributed by Iván Munsuri Ibáñez <munsuri@gmail.com>
-		id event_data = objc_msgSend((id) objc_getClass("NSEvent"), sel_registerName("eventWithCGEvent:"), event_ref);
-		int subtype = (int) objc_msgSend(event_data, sel_registerName("subtype"));
+		id event_data = objc_msg_send_id_cgevent((id) objc_getClass("NSEvent"), sel_registerName("eventWithCGEvent:"), event_ref);
+		int subtype = objc_msg_send_int(event_data, sel_registerName("subtype"));
 		#else
 		CFDataRef data = CGEventCreateData(kCFAllocatorDefault, event_ref);
 		//CFIndex len = CFDataGetLength(data);
@@ -620,7 +637,7 @@ static inline void process_system_key(uint64_t timestamp, CGEventRef event_ref) 
 		#endif
 		if (subtype == 8) {
 			#ifdef USE_OBJC
-			int data = (int) objc_msgSend(event_data, sel_registerName("data1"));
+			int data = objc_msg_send_int(event_data, sel_registerName("data1"));
 			#endif
 
 			int key_code = (data & 0xFFFF0000) >> 16;
@@ -1241,7 +1258,7 @@ UIOHOOK_API int hook_run() {
 									// Create a garbage collector to handle Cocoa events correctly.
 									Class NSAutoreleasePool_class = (Class) objc_getClass("NSAutoreleasePool");
 									id pool = class_createInstance(NSAutoreleasePool_class, 0);
-									auto_release_pool = objc_msgSend(pool, sel_registerName("init"));
+									auto_release_pool = objc_msg_send_id(pool, sel_registerName("init"));
 									#endif
 
 									// Start the hook thread runloop.
@@ -1249,8 +1266,8 @@ UIOHOOK_API int hook_run() {
 
 
 									#ifdef USE_OBJC
-									//objc_msgSend(auto_release_pool, sel_registerName("drain"));
-									objc_msgSend(auto_release_pool, sel_registerName("release"));
+									//objc_msg_send_void(auto_release_pool, sel_registerName("drain"));
+									objc_msg_send_void(auto_release_pool, sel_registerName("release"));
 									#endif
 
 									// Lock back up until we are done processing the exit.

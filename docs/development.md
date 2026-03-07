@@ -4,7 +4,7 @@
 
 - Consumers install prebuilt binaries from npm.
 - Maintainers compile native code explicitly.
-- `libuiohook` is vendored directly in this repository.
+- `uiohook` is vendored directly in this repository.
 
 ## Recommended toolchain
 
@@ -18,7 +18,7 @@
 
 Windows note: the native build is no longer based on `node-gyp`. We use `cmake-js`, but Visual Studio 2022 is still the supported compiler baseline for maintainers.
 
-Linux packages currently required by the vendored `libuiohook` build:
+Linux packages currently required by the vendored `uiohook` build:
 
 - `cmake`
 - `gcc`
@@ -73,13 +73,13 @@ Press `Esc` to stop the process.
 
 - `src/`: TypeScript API surface
 - `src/lib/`: N-API glue code
-- `libuiohook/`: vendored upstream native library sources
+- `uiohook/`: vendored upstream native library sources
 - `CMakeLists.txt`: root native build entrypoint
 - `prebuilds/`: distributable native binaries
 
 ## Maintenance rules
 
-- Do not reintroduce git submodules for `libuiohook`.
+- Do not reintroduce git submodules for `uiohook`.
 - Do not keep local changes in patch files.
 - Keep install-time compilation out of the consumer path.
 - Do not reintroduce `binding.gyp` / `node-gyp` into the main build path.

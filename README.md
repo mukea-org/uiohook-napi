@@ -3,9 +3,9 @@
 [![npm version](https://img.shields.io/npm/v/@mukea/uiohook-napi/latest?color=CC3534&label=@mukea/uiohook-napi&logo=npm&labelColor=212121)](https://www.npmjs.com/package/@mukea/uiohook-napi)
 [![GitHub repository](https://img.shields.io/badge/GitHub-mukea--org/uiohook--napi-blue?logo=github)](https://github.com/mukea-org/uiohook-napi)
 
-N-API bindings for `libuiohook`.
+N-API bindings for `uiohook`.
 
-This repository now vendors the `libuiohook` source directly. It no longer relies on a git submodule or a separate patch file during normal development and release flows.
+This repository now vendors the `uiohook` source directly in-tree. It no longer relies on a git submodule or a separate patch file during normal development and release flows.
 
 ## Runtime model
 
@@ -19,7 +19,7 @@ pnpm build
 pnpm dev
 ```
 
-`pnpm build` produces the published JS output under `dist/`. `pnpm dev` builds the local native addon and starts the interactive hook listener for development and testing on Windows, Linux, and macOS. The native build is CMake-driven through `cmake-js`. See [development.md](./docs/development.md) for local setup and [UPSTREAM.md](./UPSTREAM.md) for vendored `libuiohook` maintenance rules.
+`pnpm build` produces the published JS output under `dist/`. `pnpm dev` builds the local native addon and starts the interactive hook listener for development and testing on Windows, Linux, and macOS. The native build is CMake-driven through `cmake-js`. See [development.md](./docs/development.md) for local setup and [UPSTREAM.md](./UPSTREAM.md) for vendored `uiohook` maintenance rules.
 
 ## Usage example
 

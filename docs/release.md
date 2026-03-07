@@ -14,18 +14,11 @@ The `Release` GitHub Actions workflow then:
 - merges all `prebuilds/` artifacts into one package workspace
 - verifies the package loads with `PREBUILDS_ONLY=1`
 - runs `npm pack`
-- publishes to npm using `NPM_TOKEN`
+- publishes to GitHub Packages first
+- publishes to npmjs second
+- keeps the two publish jobs independent: npmjs publish still runs even if GitHub Packages publish fails
 
 Configure the repository secret `NPM_TOKEN` before first release.
-
-## Manual dispatch
-
-The `Release` workflow also supports `workflow_dispatch` with:
-
-- `npm_tag`: npm dist-tag, default `latest`
-- `dry_run`: run `npm publish --dry-run` without publishing
-
-Use this to test the publish path before pushing a release tag.
 
 ## Manual fallback
 
@@ -48,6 +41,14 @@ npm publish --access public
 ## Before publishing
 
 - Ensure the repository secret `NPM_TOKEN` is configured.
-- Confirm `UPSTREAM.md` reflects the current vendored `libuiohook` base.
-- Review the diff under `libuiohook/`.
+- Ensure GitHub Actions has permission to write packages.
+- Confirm `UPSTREAM.md` reflects the current vendored `uiohook` base.
+- Review the diff under `uiohook/`.
 - Verify `README.md` and `docs/development.md` match the supported toolchain.
+
+## Package names by registry
+
+- npmjs keeps the public package name: `@mukea/uiohook-napi`
+- GitHub Packages is published as: `@mukea-org/uiohook-napi`
+
+This split exists because GitHub Packages uses the GitHub owner namespace.

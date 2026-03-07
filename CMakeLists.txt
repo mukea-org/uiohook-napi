@@ -21,44 +21,44 @@ foreach(CONFIG Debug Release RelWithDebInfo MinSizeRel)
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG_UPPER} ${CMAKE_SOURCE_DIR}/build)
 endforeach()
 
-set(LIBUIOHOOK_SOURCES
-  libuiohook/src/logger.c
+set(UIOHOOK_SOURCES
+  uiohook/src/logger.c
 )
 
-set(LIBUIOHOOK_INCLUDE_DIRS
-  ${CMAKE_SOURCE_DIR}/libuiohook/include
-  ${CMAKE_SOURCE_DIR}/libuiohook/src
+set(UIOHOOK_INCLUDE_DIRS
+  ${CMAKE_SOURCE_DIR}/uiohook/include
+  ${CMAKE_SOURCE_DIR}/uiohook/src
 )
 
-add_library(libuiohook STATIC)
-target_sources(libuiohook PRIVATE ${LIBUIOHOOK_SOURCES})
-target_include_directories(libuiohook PRIVATE ${LIBUIOHOOK_INCLUDE_DIRS})
+add_library(uiohook STATIC)
+target_sources(uiohook PRIVATE ${UIOHOOK_SOURCES})
+target_include_directories(uiohook PRIVATE ${UIOHOOK_INCLUDE_DIRS})
 
 if(MSVC)
-  target_compile_options(libuiohook PRIVATE /W3)
+  target_compile_options(uiohook PRIVATE /W3)
 else()
-  target_compile_options(libuiohook PRIVATE -Wall -Wextra -Wpedantic)
+  target_compile_options(uiohook PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
 if(WIN32)
-  target_sources(libuiohook PRIVATE
-    libuiohook/src/windows/input_helper.c
-    libuiohook/src/windows/input_hook.c
-    libuiohook/src/windows/post_event.c
-    libuiohook/src/windows/system_properties.c
+  target_sources(uiohook PRIVATE
+    uiohook/src/windows/input_helper.c
+    uiohook/src/windows/input_hook.c
+    uiohook/src/windows/post_event.c
+    uiohook/src/windows/system_properties.c
   )
-  target_include_directories(libuiohook PRIVATE ${CMAKE_SOURCE_DIR}/libuiohook/src/windows)
-  target_link_libraries(libuiohook PRIVATE user32)
+  target_include_directories(uiohook PRIVATE ${CMAKE_SOURCE_DIR}/uiohook/src/windows)
+  target_link_libraries(uiohook PRIVATE user32)
 elseif(APPLE)
-  target_sources(libuiohook PRIVATE
-    libuiohook/src/darwin/input_helper.c
-    libuiohook/src/darwin/input_hook.c
-    libuiohook/src/darwin/post_event.c
-    libuiohook/src/darwin/system_properties.c
+  target_sources(uiohook PRIVATE
+    uiohook/src/darwin/input_helper.c
+    uiohook/src/darwin/input_hook.c
+    uiohook/src/darwin/post_event.c
+    uiohook/src/darwin/system_properties.c
   )
-  target_include_directories(libuiohook PRIVATE ${CMAKE_SOURCE_DIR}/libuiohook/src/darwin)
-  target_compile_definitions(libuiohook PRIVATE __MACOSX_CORE__ USE_IOKIT USE_APPLICATION_SERVICES USE_OBJC)
-  target_link_libraries(libuiohook PRIVATE
+  target_include_directories(uiohook PRIVATE ${CMAKE_SOURCE_DIR}/uiohook/src/darwin)
+  target_compile_definitions(uiohook PRIVATE __MACOSX_CORE__ USE_IOKIT USE_APPLICATION_SERVICES USE_OBJC)
+  target_link_libraries(uiohook PRIVATE
     "-framework IOKit"
     "-framework Carbon"
     "-framework ApplicationServices"
@@ -79,14 +79,14 @@ else()
   pkg_check_modules(XKBCOMMON REQUIRED xkbcommon)
   pkg_check_modules(XKBCOMMON_X11 REQUIRED xkbcommon-x11)
 
-  target_sources(libuiohook PRIVATE
-    libuiohook/src/x11/input_helper.c
-    libuiohook/src/x11/input_hook.c
-    libuiohook/src/x11/post_event.c
-    libuiohook/src/x11/system_properties.c
+  target_sources(uiohook PRIVATE
+    uiohook/src/x11/input_helper.c
+    uiohook/src/x11/input_hook.c
+    uiohook/src/x11/post_event.c
+    uiohook/src/x11/system_properties.c
   )
-  target_include_directories(libuiohook PRIVATE
-    ${CMAKE_SOURCE_DIR}/libuiohook/src/x11
+  target_include_directories(uiohook PRIVATE
+    ${CMAKE_SOURCE_DIR}/uiohook/src/x11
     ${X11_INCLUDE_DIRS}
     ${X11_XCB_INCLUDE_DIRS}
     ${XRANDR_INCLUDE_DIRS}
@@ -98,7 +98,7 @@ else()
     ${XKBCOMMON_X11_INCLUDE_DIRS}
   )
   target_compile_definitions(
-    libuiohook
+    uiohook
     PRIVATE
       USE_XKB
       USE_XKBCOMMON
@@ -107,8 +107,8 @@ else()
       USE_EVDEV
       USE_XT
   )
-  target_compile_options(libuiohook PRIVATE -pthread)
-  target_link_libraries(libuiohook PRIVATE
+  target_compile_options(uiohook PRIVATE -pthread)
+  target_link_libraries(uiohook PRIVATE
     Threads::Threads
     ${X11_LIBRARIES}
     ${X11_XCB_LIBRARIES}
@@ -132,10 +132,10 @@ add_library(${PROJECT_NAME} SHARED
 target_compile_definitions(${PROJECT_NAME} PRIVATE NAPI_VERSION=8)
 target_include_directories(${PROJECT_NAME} PRIVATE
   ${CMAKE_JS_INC}
-  ${CMAKE_SOURCE_DIR}/libuiohook/include
+  ${CMAKE_SOURCE_DIR}/uiohook/include
   ${CMAKE_SOURCE_DIR}/src/lib
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE libuiohook ${CMAKE_JS_LIB})
+target_link_libraries(${PROJECT_NAME} PRIVATE uiohook ${CMAKE_JS_LIB})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 
 if(WIN32)
