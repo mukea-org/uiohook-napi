@@ -1,6 +1,6 @@
 {
   "name": "@mukea/uiohook-napi",
-  "version": "2.0.0-alpha2",
+  "version": "2.0.0-alpha3",
   "author": {
     "name": "mukea.cc"
   },
@@ -30,7 +30,8 @@
   "scripts": {
     "build": "node ./scripts/build-ts.mjs",
     "dev": "node ./scripts/run-cmake-js.mjs build && ts-node ./scripts/dev.ts",
-    "prepack": "node ./scripts/build-ts.mjs && node ./scripts/verify-prebuilds.mjs"
+    "prepack": "node ./scripts/build-ts.mjs && node ./scripts/verify-prebuilds.mjs",
+    "verify:pack": "node ./scripts/verify-pack.mjs"
   },
   "files": [
     "dist",

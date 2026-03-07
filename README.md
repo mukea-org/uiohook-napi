@@ -9,7 +9,34 @@ This repository now vendors the `uiohook` source directly in-tree. It no longer 
 
 ## Runtime model
 
-Consumers are expected to install prebuilt native binaries from npm. The package no longer performs install-time native compilation.
+Consumers are expected to install a published registry package that already contains `dist/` and `prebuilds/`. The package no longer performs install-time native compilation.
+
+## Installation
+
+Supported registry installs:
+
+```bash
+npm install @mukea/uiohook-napi
+```
+
+For GitHub Packages, use the GitHub owner scope and configure the registry first:
+
+```ini
+@mukea-org:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+```bash
+npm install @mukea-org/uiohook-napi
+```
+
+Unsupported install method:
+
+```bash
+npm install github:mukea-org/uiohook-napi#v2.0.0-alpha3
+```
+
+Git URL installs fetch the repository snapshot at that tag, not the published registry tarball. That snapshot does not include generated `dist/` or bundled `prebuilds/`, so it is not a supported consumer path.
 
 For day-to-day work:
 

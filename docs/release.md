@@ -13,7 +13,7 @@ The `Release` GitHub Actions workflow then:
 - builds platform prebuilds on Windows, Linux, and macOS
 - merges all `prebuilds/` artifacts into one package workspace
 - verifies the package loads with `PREBUILDS_ONLY=1`
-- runs `npm pack`
+- verifies the packed tarball contains `dist/` and `prebuilds/`
 - publishes to GitHub Packages first
 - publishes to npmjs second
 - keeps the two publish jobs independent: npmjs publish still runs even if GitHub Packages publish fails
@@ -53,3 +53,5 @@ npm publish --access public
 - GitHub Packages is published as: `@mukea-org/uiohook-napi`
 
 This split exists because GitHub Packages uses the GitHub owner namespace.
+
+Do not use `github:mukea-org/uiohook-napi#<tag>` as a consumer install path. Git URL installs fetch the repository snapshot, not the published package tarball.

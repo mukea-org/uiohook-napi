@@ -169,7 +169,7 @@ jobs:
       - run: pnpm build
       - run: node ./scripts/verify-prebuilds.mjs
       - run: node -e "process.env.PREBUILDS_ONLY='1'; require('./dist/index.js')"
-      - run: npm pack
+      - run: pnpm verify:pack
 
       - uses: actions/upload-artifact@v4
         with:
