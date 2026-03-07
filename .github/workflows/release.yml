@@ -150,6 +150,20 @@ jobs:
         with:
           run_install: false
 
+      - name: Install Linux runtime dependencies for prebuilt validation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libx11-6 \
+            libx11-xcb1 \
+            libxcb1 \
+            libxcb-xkb1 \
+            libxrandr2 \
+            libxt6 \
+            libxtst6 \
+            libxkbcommon0 \
+            libxkbcommon-x11-0
+
       - run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm build
@@ -211,7 +225,7 @@ jobs:
     needs:
       - package
       - publish-github-packages
-    if: always() && needs.package.result == 'success'
+    if: always() && needs.package.result == 'success' && secrets.NPM_TOKEN != ''
     runs-on: ubuntu-22.04
     permissions:
       contents: read

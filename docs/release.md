@@ -17,6 +17,7 @@ The `Release` GitHub Actions workflow then:
 - publishes to GitHub Packages first
 - publishes to npmjs second
 - keeps the two publish jobs independent: npmjs publish still runs even if GitHub Packages publish fails
+- skips npmjs publish automatically when `NPM_TOKEN` is not configured
 
 Configure the repository secret `NPM_TOKEN` before first release.
 
@@ -40,7 +41,7 @@ npm publish --access public
 
 ## Before publishing
 
-- Ensure the repository secret `NPM_TOKEN` is configured.
+- Ensure the repository secret `NPM_TOKEN` is configured if npmjs publish should run.
 - Ensure GitHub Actions has permission to write packages.
 - Confirm `UPSTREAM.md` reflects the current vendored `uiohook` base.
 - Review the diff under `uiohook/`.
