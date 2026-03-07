@@ -13,6 +13,9 @@ permissions:
   contents: read
   packages: write
 
+env:
+  HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+
 jobs:
   validate-version:
     runs-on: ubuntu-22.04
@@ -225,7 +228,7 @@ jobs:
     needs:
       - package
       - publish-github-packages
-    if: always() && needs.package.result == 'success' && secrets.NPM_TOKEN != ''
+    if: always() && needs.package.result == 'success' && env.HAS_NPM_TOKEN == 'true'
     runs-on: ubuntu-22.04
     permissions:
       contents: read
