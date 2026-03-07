@@ -1,6 +1,6 @@
 {
   "name": "@mukea/uiohook-napi",
-  "version": "1.7.1",
+  "version": "2.0.0-alpha1",
   "author": {
     "name": "mukea.cc"
   },
@@ -29,52 +29,43 @@
   },
   "packageManager": "pnpm@10.25.0",
   "scripts": {
-    "install": "node-gyp-build",
-    "prebuild": "prebuildify --napi",
-    "prepublishOnly": "npm run build-ts && npm run prebuild",
-    "build-ts": "tsc",
+    "build": "pnpm build-ts",
+    "build-ts": "node ./scripts/build-ts.mjs",
+    "native:build": "node ./scripts/run-cmake-js.mjs build",
+    "native:clean": "node ./scripts/run-cmake-js.mjs clean",
+    "prebuild": "node ./scripts/build-prebuild.mjs",
+    "prepublishOnly": "pnpm build-ts && node ./scripts/verify-prebuilds.mjs",
+    "pack:local": "pnpm build-ts && pnpm prebuild && npm pack",
     "demo": "ts-node src/demo.ts",
-    "make-libuiohook-patch": "git -C ./libuiohook diff --cached > ./src/libuiohook.patch",
-    "apply-libuiohook-patch": "git -C ./libuiohook apply ../src/libuiohook.patch"
+    "demo:keys": "pnpm native:build && ts-node src/demo.ts",
+    "sync:libuiohook": "powershell -ExecutionPolicy Bypass -File ./scripts/sync-upstream.ps1"
   },
   "files": [
     "dist",
-    "binding.gyp",
-    "libuiohook/src",
-    "libuiohook/include",
-    "src/lib",
     "prebuilds"
   ],
   "devDependencies": {
     "@types/node": "^20.11.30",
-    "prebuildify": "^6.0.1",
+    "cmake-js": "^7.3.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "node-gyp-build": "4.x.x"
   },
-  "prebuild": {
-    "test": "dist/prebuild-test-noop.js"
-  },
-  "gypfile": true,
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
+  },
+  "binary": {
+    "napi_versions": [
+      8,
+      9,
+      10
+    ]
   },
   "napi_versions": [
     8,
     9,
     10
-  ],
-  "overrides": {
-    "node-gyp": "^10.0.0"
-  },
-  "resolutions": {
-    "node-gyp": "^10.0.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "node-gyp": "^10.0.0"
-    }
-  }
+  ]
 }

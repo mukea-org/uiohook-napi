@@ -1,6 +1,21 @@
 import { EventEmitter } from 'events'
 import { join } from 'path'
-const lib: AddonExports = require('node-gyp-build')(join(__dirname, '..'))
+
+function loadNativeBinding (): AddonExports {
+  try {
+    return require('node-gyp-build')(join(__dirname, '..'))
+  } catch (error) {
+    const details = error instanceof Error ? `\n\n${error.message}` : ''
+    throw new Error(
+      'Failed to load @mukea/uiohook-napi native bindings. ' +
+      'This package now expects prebuilt binaries to be shipped with the package. ' +
+      'If you are developing this repository locally, run `pnpm native:build` or `pnpm prebuild` first.' +
+      details
+    )
+  }
+}
+
+const lib: AddonExports = loadNativeBinding()
 
 interface AddonExports {
   start (cb: (e: any) => void): void
@@ -15,6 +30,7 @@ enum KeyToggle {
 }
 
 export enum EventType {
+  EVENT_KEY_TYPED = 3,
   EVENT_KEY_PRESSED = 4,
   EVENT_KEY_RELEASED = 5,
   EVENT_MOUSE_CLICKED = 6,
@@ -25,12 +41,14 @@ export enum EventType {
 }
 
 export interface UiohookKeyboardEvent {
-  type: EventType.EVENT_KEY_PRESSED | EventType.EVENT_KEY_RELEASED
+  type: EventType.EVENT_KEY_TYPED | EventType.EVENT_KEY_PRESSED | EventType.EVENT_KEY_RELEASED
   time: number
   altKey: boolean
   ctrlKey: boolean
   metaKey: boolean
   shiftKey: boolean
+  rawcode: number
+  keychar: number
   keycode: number
 }
 
@@ -200,6 +218,7 @@ export const UiohookKey = {
 declare interface UiohookNapi {
   on(event: 'input', listener: (e: UiohookKeyboardEvent | UiohookMouseEvent | UiohookWheelEvent) => void): this
 
+  on(event: 'keypress', listener: (e: UiohookKeyboardEvent) => void): this
   on(event: 'keydown', listener: (e: UiohookKeyboardEvent) => void): this
   on(event: 'keyup', listener: (e: UiohookKeyboardEvent) => void): this
 
@@ -215,6 +234,9 @@ class UiohookNapi extends EventEmitter {
   private handler (e: UiohookKeyboardEvent | UiohookMouseEvent | UiohookWheelEvent) {
     this.emit('input', e)
     switch (e.type) {
+      case EventType.EVENT_KEY_TYPED:
+        this.emit('keypress', e)
+        break
       case EventType.EVENT_KEY_PRESSED:
         this.emit('keydown', e)
         break

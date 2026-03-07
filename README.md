@@ -3,9 +3,26 @@
 [![npm version](https://img.shields.io/npm/v/@mukea/uiohook-napi/latest?color=CC3534&label=@mukea/uiohook-napi&logo=npm&labelColor=212121)](https://www.npmjs.com/package/@mukea/uiohook-napi)
 [![GitHub repository](https://img.shields.io/badge/GitHub-mukea--org/uiohook--napi-blue?logo=github)](https://github.com/mukea-org/uiohook-napi)
 
-N-API C-bindings for [libuiohook](https://github.com/kwhat/libuiohook), available at the [@mukea](https://www.npmjs.com/org/mukea) scope.
+N-API bindings for `libuiohook`.
 
-### Usage example
+This repository now vendors the `libuiohook` source directly. It no longer relies on a git submodule or a separate patch file during normal development and release flows.
+
+## Runtime model
+
+Consumers are expected to install prebuilt native binaries from npm. The package no longer performs install-time native compilation.
+
+Maintainers build native artifacts explicitly:
+
+```powershell
+pnpm install --ignore-scripts
+pnpm build-ts
+pnpm native:build
+pnpm prebuild
+```
+
+The native build is now CMake-driven through `cmake-js`. See [development.md](./docs/development.md) for local setup and [UPSTREAM.md](./UPSTREAM.md) for vendored `libuiohook` maintenance rules.
+
+## Usage example
 
 ```typescript
 import { uIOhook, UiohookKey } from '@mukea/uiohook-napi'
@@ -23,11 +40,12 @@ uIOhook.on('keydown', (e) => {
 uIOhook.start()
 ```
 
-### API
+## API
 
 ```typescript
 interface UiohookNapi {
   on(event: 'input', listener: (e: UiohookKeyboardEvent | UiohookMouseEvent | UiohookWheelEvent) => void): this
+  on(event: 'keypress', listener: (e: UiohookKeyboardEvent) => void): this
   on(event: 'keydown', listener: (e: UiohookKeyboardEvent) => void): this
   on(event: 'keyup', listener: (e: UiohookKeyboardEvent) => void): this
   on(event: 'mousedown', listener: (e: UiohookMouseEvent) => void): this
@@ -37,37 +55,5 @@ interface UiohookNapi {
   on(event: 'wheel', listener: (e: UiohookWheelEvent) => void): this
   keyTap(key: keycode, modifiers?: keycode[]): void
   keyToggle(key: keycode, toggle: 'down' | 'up'): void
-}
-
-export interface UiohookKeyboardEvent {
-  altKey: boolean
-  ctrlKey: boolean
-  metaKey: boolean
-  shiftKey: boolean
-  keycode: number
-}
-
-export interface UiohookMouseEvent {
-  altKey: boolean
-  ctrlKey: boolean
-  metaKey: boolean
-  shiftKey: boolean
-  x: number
-  y: number
-  button: unknown
-  clicks: number
-}
-
-export interface UiohookWheelEvent {
-  altKey: boolean
-  ctrlKey: boolean
-  metaKey: boolean
-  shiftKey: boolean
-  x: number
-  y: number
-  clicks: number
-  amount: number
-  direction: WheelDirection
-  rotation: number
 }
 ```

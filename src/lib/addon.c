@@ -8,6 +8,13 @@
 static napi_threadsafe_function threadsafe_fn = NULL;
 static bool is_worker_running = false;
 
+static napi_value get_undefined(napi_env env) {
+  napi_value undefined_value;
+  napi_status status = napi_get_undefined(env, &undefined_value);
+  NAPI_FATAL_IF_FAILED(status, "get_undefined", "napi_get_undefined");
+  return undefined_value;
+}
+
 void dispatch_proc(uiohook_event* const event) {
   if (threadsafe_fn == NULL) return;
 
@@ -57,9 +64,17 @@ napi_value uiohook_to_js_event(napi_env env, uiohook_event* event) {
   status = napi_create_double(env, (double)event->time, &e_time);
   NAPI_FATAL_IF_FAILED(status, "uiohook_to_js_event", "napi_create_double");
 
-  if (event->type == EVENT_KEY_PRESSED || event->type == EVENT_KEY_RELEASED) {
+  if (event->type == EVENT_KEY_TYPED || event->type == EVENT_KEY_PRESSED || event->type == EVENT_KEY_RELEASED) {
     napi_value e_keycode;
     status = napi_create_uint32(env, event->data.keyboard.keycode, &e_keycode);
+    NAPI_FATAL_IF_FAILED(status, "uiohook_to_js_event", "napi_create_uint32");
+
+    napi_value e_rawcode;
+    status = napi_create_uint32(env, event->data.keyboard.rawcode, &e_rawcode);
+    NAPI_FATAL_IF_FAILED(status, "uiohook_to_js_event", "napi_create_uint32");
+
+    napi_value e_keychar;
+    status = napi_create_uint32(env, event->data.keyboard.keychar, &e_keychar);
     NAPI_FATAL_IF_FAILED(status, "uiohook_to_js_event", "napi_create_uint32");
 
     napi_property_descriptor descriptors[] = {
@@ -69,6 +84,8 @@ napi_value uiohook_to_js_event(napi_env env, uiohook_event* event) {
       { "ctrlKey",  NULL, NULL, NULL, NULL, e_ctrlKey,  napi_enumerable, NULL },
       { "metaKey",  NULL, NULL, NULL, NULL, e_metaKey,  napi_enumerable, NULL },
       { "shiftKey", NULL, NULL, NULL, NULL, e_shiftKey, napi_enumerable, NULL },
+      { "rawcode",  NULL, NULL, NULL, NULL, e_rawcode,  napi_enumerable, NULL },
+      { "keychar",  NULL, NULL, NULL, NULL, e_keychar,  napi_enumerable, NULL },
       { "keycode",  NULL, NULL, NULL, NULL, e_keycode,  napi_enumerable, NULL },
     };
     status = napi_define_properties(env, event_obj, sizeof(descriptors) / sizeof(descriptors[0]), descriptors);
@@ -179,7 +196,7 @@ void tsfn_to_js_proxy(napi_env env, napi_value js_callback, void* context, void*
 
 napi_value AddonStart(napi_env env, napi_callback_info info) {
   if (is_worker_running == true)
-    return NULL;
+    return get_undefined(env);
 
   napi_status status;
 
@@ -207,7 +224,7 @@ napi_value AddonStart(napi_env env, napi_callback_info info) {
   switch (worker_status) {
   case UIOHOOK_SUCCESS: {
     is_worker_running = true;
-    return NULL;
+    return get_undefined(env);
   }
   case UIOHOOK_ERROR_THREAD_CREATE:
     NAPI_THROW(env, "UIOHOOK_ERROR_THREAD_CREATE", "Failed to create worker thread.", NULL);
@@ -243,7 +260,7 @@ napi_value AddonStart(napi_env env, napi_callback_info info) {
 
 napi_value AddonStop(napi_env env, napi_callback_info info) {
   if (is_worker_running == false)
-    return NULL;
+    return get_undefined(env);
 
   int status = uiohook_worker_stop();
 
@@ -252,7 +269,7 @@ napi_value AddonStop(napi_env env, napi_callback_info info) {
     is_worker_running = false;
     napi_release_threadsafe_function(threadsafe_fn, napi_tsfn_release);
     threadsafe_fn = NULL;
-    return NULL;
+    return get_undefined(env);
   }
   case UIOHOOK_ERROR_OUT_OF_MEMORY:
     NAPI_THROW(env, "UIOHOOK_ERROR_OUT_OF_MEMORY", "Failed to allocate memory.", NULL);
@@ -267,6 +284,12 @@ napi_value AddonStop(napi_env env, napi_callback_info info) {
 void AddonCleanUp (void* arg) {
   if (is_worker_running) {
     uiohook_worker_stop();
+    is_worker_running = false;
+  }
+
+  if (threadsafe_fn != NULL) {
+    napi_release_threadsafe_function(threadsafe_fn, napi_tsfn_release);
+    threadsafe_fn = NULL;
   }
 }
 
@@ -308,7 +331,7 @@ napi_value AddonKeyTap (napi_env env, napi_callback_info info) {
     hook_post_event(&event);
   }
 
-  return NULL;
+  return get_undefined(env);
 }
 
 NAPI_MODULE_INIT() {

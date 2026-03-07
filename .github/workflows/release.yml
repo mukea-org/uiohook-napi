@@ -1,44 +1,62 @@
-name: Prebuild
+name: Release
 
 on:
   push:
+    tags:
+      - 'v*'
   workflow_dispatch:
+    inputs:
+      npm_tag:
+        description: npm dist-tag to publish under
+        required: true
+        default: latest
+        type: string
+      dry_run:
+        description: Run npm publish in dry-run mode
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
-  group: prebuild-${{ github.ref }}
+  group: release-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
-  validate-js:
+  validate-version:
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
 
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - run: node -v
-      - run: cmake --version
-      - run: pnpm -v
-      - run: pnpm install --frozen-lockfile --ignore-scripts
-      - run: pnpm build-ts
+      - name: Verify git tag matches package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          package_version=$(node -p "require('./package.json').version")
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [ "$package_version" != "$tag_version" ]; then
+            echo "package.json version: $package_version"
+            echo "git tag version: $tag_version"
+            exit 1
+          fi
 
   prebuild-windows:
+    needs: validate-version
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -47,28 +65,23 @@ jobs:
         with:
           run_install: false
 
-      - run: node -v
-      - run: cmake --version
-      - run: node -p "process.versions.napi"
-      - run: pnpm -v
-
-      - name: Clear pnpm cache
-        run: pnpm store prune
+      - run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
-
       - run: pnpm prebuild
 
       - uses: actions/upload-artifact@v4
         with:
-          name: windows
+          name: prebuilds-windows
           path: prebuilds
 
   prebuild-linux:
+    needs: validate-version
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -76,11 +89,6 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
-
-      - run: node -v
-      - run: cmake --version
-      - run: node -p "process.versions.napi"
-      - run: pnpm -v
 
       - run: |
           sudo apt-get update
@@ -96,23 +104,23 @@ jobs:
             libxkbcommon-x11-dev \
             libxkbfile-dev
 
-      - name: Clear pnpm cache
-        run: pnpm store prune
+      - run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
-
       - run: pnpm prebuild
 
       - uses: actions/upload-artifact@v4
         with:
-          name: linux
+          name: prebuilds-linux
           path: prebuilds
 
   prebuild-darwin:
+    needs: validate-version
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -121,25 +129,17 @@ jobs:
         with:
           run_install: false
 
-      - run: node -v
-      - run: cmake --version
-      - run: node -p "process.versions.napi"
-      - run: pnpm -v
-
-      - name: Clear pnpm cache
-        run: pnpm store prune
+      - run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
-
       - run: pnpm prebuild
 
       - uses: actions/upload-artifact@v4
         with:
-          name: darwin
+          name: prebuilds-darwin
           path: prebuilds
 
-  build-package:
+  publish:
     needs:
-      - validate-js
       - prebuild-windows
       - prebuild-linux
       - prebuild-darwin
@@ -148,6 +148,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/download-artifact@v4
         with:
           path: prebuilds
@@ -156,26 +157,36 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: https://registry.npmjs.org
 
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
 
-      - run: node -v
-      - run: cmake --version
-      - run: node -p "process.versions.napi"
-      - run: pnpm -v
-
-      - name: Clear pnpm cache
-        run: pnpm store prune
+      - run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm build-ts
       - run: node ./scripts/verify-prebuilds.mjs
       - run: node -e "process.env.PREBUILDS_ONLY='1'; require('./dist/index.js')"
       - run: npm pack
 
-
       - uses: actions/upload-artifact@v4
         with:
           name: package
           path: "mukea-uiohook-napi-*.tgz"
+
+      - name: Publish to npm (dry-run)
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run
+        run: npm publish --access public --tag "${{ inputs.npm_tag }}" --dry-run
+
+      - name: Publish to npm (manual)
+        if: github.event_name == 'workflow_dispatch' && !inputs.dry_run
+        run: npm publish --access public --tag "${{ inputs.npm_tag }}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm (tag release)
+        if: github.event_name == 'push'
+        run: npm publish --access public --tag latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

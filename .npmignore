@@ -1,0 +1,10 @@
+node_modules/
+build/
+libuiohook/
+src/
+docs/
+scripts/
+.github/
+.vscode/
+.gitmodules
+pnpm-lock.yaml
