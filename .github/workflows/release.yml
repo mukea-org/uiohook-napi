@@ -246,6 +246,13 @@ jobs:
           publish_tag=$(node -p "const version = require('./package.json').version; const prerelease = version.split('-', 2)[1]; prerelease ? prerelease.split('.')[0] : 'latest'")
           echo "PUBLISH_TAG=$publish_tag" >> "$GITHUB_ENV"
 
+      - name: Explain npmjs publish skip
+        if: env.NPM_TOKEN == ''
+        shell: bash
+        run: |
+          echo "NPM_TOKEN is not configured."
+          echo "Skipping npmjs publish for $GITHUB_REF_NAME."
+
       - name: Publish to npmjs
         if: env.NPM_TOKEN != ''
         run: npm publish --access public --tag "$PUBLISH_TAG"
