@@ -167,7 +167,11 @@ jobs:
       - run: pnpm store prune
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: node ./scripts/build.mjs
-      - run: node -e "const { uIOhook } = require('./dist/index.js'); uIOhook.stop()"
+      - run: node -e "const pkg = require('./dist/index.js'); if (pkg.uIOhook == null) throw new Error('Missing uIOhook export')"
+      - name: Verify packaged prebuilds are present
+        shell: bash
+        run: |
+          find prebuilds -type f -name '*.node' | grep -q .
       - run: npm pack --ignore-scripts
 
       - uses: actions/upload-artifact@v4

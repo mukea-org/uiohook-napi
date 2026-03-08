@@ -13,7 +13,7 @@ The `Release` GitHub Actions workflow then:
 - builds platform prebuilds on Windows, Linux, and macOS
 - builds `dist/` once in the package job
 - merges all `prebuilds/` artifacts into one package workspace
-- verifies the packaged workspace can load the native binding and be packed
+- verifies the packaged workspace exports `uIOhook`, contains prebuilt binaries, and can be packed
 - publishes to GitHub Packages first
 - publishes to npmjs second
 - skips npmjs publish automatically when `NPM_TOKEN` is not configured
@@ -35,7 +35,8 @@ For prerelease versions such as `2.0.0-alpha4`, publish with a non-`latest` dist
 ## CI expectations
 
 - Build prebuilt binaries for supported platforms and architectures.
-- Verify the package workspace can load the native binding.
+- Verify the package workspace exports `uIOhook`.
+- Verify packaged prebuilt binaries are present.
 - Verify the package can be packed with `dist/` and `prebuilds/`.
 
 ## Before publishing
