@@ -1,18 +1,60 @@
 import { EventEmitter } from 'events'
+import { existsSync } from 'fs'
 import { join } from 'path'
 
 function loadNativeBinding (): AddonExports {
+  const packageRoot = join(__dirname, '..')
+
   try {
-    return require('node-gyp-build')(join(__dirname, '..'))
+    return require(resolveNativeBindingPath(packageRoot))
   } catch (error) {
     const details = error instanceof Error ? `\n\n${error.message}` : ''
     throw new Error(
       'Failed to load @mukea/uiohook-napi native bindings. ' +
       'This package now expects prebuilt binaries to be shipped with the package. ' +
-      'If you are developing this repository locally, run `pnpm dev` or `node ./scripts/run-cmake-js.mjs build` first.' +
+      'If you are developing this repository locally, run `pnpm dev` or `node ./scripts/prebuild.mjs` first.' +
       details
     )
   }
+}
+
+function resolveNativeBindingPath (packageRoot: string): string {
+  const tuple = `${process.platform}-${process.arch}`
+  const prebuildDir = join(packageRoot, 'prebuilds', tuple)
+
+  for (const fileName of getNativeBindingCandidates()) {
+    const candidate = join(prebuildDir, fileName)
+    if (existsSync(candidate)) {
+      return candidate
+    }
+  }
+
+  throw new Error(
+    `No native binding was found for ${tuple}. Looked in ${prebuildDir}.`
+  )
+}
+
+function getNativeBindingCandidates (): string[] {
+  if (process.platform !== 'linux') {
+    return ['node.napi.node']
+  }
+
+  const libc = detectLinuxLibc()
+  return libc === 'musl'
+    ? ['node.napi.musl.node', 'node.napi.glibc.node']
+    : ['node.napi.glibc.node', 'node.napi.musl.node']
+}
+
+function detectLinuxLibc (): 'glibc' | 'musl' {
+  if (process.platform !== 'linux') {
+    return 'glibc'
+  }
+
+  const report = process.report?.getReport() as { header?: { glibcVersionRuntime?: unknown } } | undefined
+  const glibcVersionRuntime = report?.header?.glibcVersionRuntime
+  return typeof glibcVersionRuntime === 'string' && glibcVersionRuntime.length > 0
+    ? 'glibc'
+    : 'musl'
 }
 
 let nativeBinding: AddonExports | undefined

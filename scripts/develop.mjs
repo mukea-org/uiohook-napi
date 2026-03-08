@@ -1,8 +1,32 @@
-import { EventType, UiohookKey, type UiohookKeyboardEvent, uIOhook } from '../src'
+import { spawnSync } from 'node:child_process'
+import path from 'node:path'
+import { createRequire } from 'node:module'
 
-const keycodeMap = new Map<number, string>(
+const rootDir = process.cwd()
+
+runNodeScript('build.mjs')
+runNodeScript('prebuild.mjs')
+
+const require = createRequire(import.meta.url)
+const { EventType, UiohookKey, uIOhook } = require(path.join(rootDir, 'dist', 'index.js'))
+
+const keycodeMap = new Map(
   Object.entries(UiohookKey).map(([name, code]) => [code, name])
 )
+
+main()
+
+function runNodeScript (scriptName) {
+  const result = spawnSync(process.execPath, [path.join(rootDir, 'scripts', scriptName)], {
+    cwd: rootDir,
+    env: process.env,
+    stdio: 'inherit'
+  })
+
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1)
+  }
+}
 
 function main () {
   console.log('uIOhook development listener started.')
@@ -31,7 +55,7 @@ function main () {
   uIOhook.start()
 }
 
-function printKeyboardEvent (event: UiohookKeyboardEvent) {
+function printKeyboardEvent (event) {
   const type = getEventName(event.type)
   const keyName = keycodeMap.get(event.keycode) ?? 'Unknown'
   const charDisplay = formatKeychar(event.keychar)
@@ -55,7 +79,7 @@ function printKeyboardEvent (event: UiohookKeyboardEvent) {
   )
 }
 
-function getEventName (type: UiohookKeyboardEvent['type']) {
+function getEventName (type) {
   switch (type) {
     case EventType.EVENT_KEY_TYPED:
       return 'keypress'
@@ -68,7 +92,7 @@ function getEventName (type: UiohookKeyboardEvent['type']) {
   }
 }
 
-function formatKeychar (keychar: number) {
+function formatKeychar (keychar) {
   if (!keychar) {
     return '-'
   }
@@ -81,12 +105,10 @@ function formatKeychar (keychar: number) {
   }
 }
 
-function shutdown (code: number) {
+function shutdown (code) {
   try {
     uIOhook.stop()
   } finally {
     process.exit(code)
   }
 }
-
-main()

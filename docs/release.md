@@ -11,12 +11,11 @@
 The `Release` GitHub Actions workflow then:
 
 - builds platform prebuilds on Windows, Linux, and macOS
+- builds `dist/` once in the package job
 - merges all `prebuilds/` artifacts into one package workspace
-- verifies the package loads with `PREBUILDS_ONLY=1`
-- verifies the packed tarball contains `dist/` and `prebuilds/`
+- verifies the packaged workspace can load the native binding and be packed
 - publishes to GitHub Packages first
 - publishes to npmjs second
-- keeps the two publish jobs independent: npmjs publish still runs even if GitHub Packages publish fails
 - skips npmjs publish automatically when `NPM_TOKEN` is not configured
 
 Configure the repository secret `NPM_TOKEN` before first release.
@@ -25,19 +24,19 @@ Configure the repository secret `NPM_TOKEN` before first release.
 
 ```powershell
 pnpm install --ignore-scripts
-pnpm build
-node ./scripts/build-prebuild.mjs
-node ./scripts/verify-prebuilds.mjs
-npm pack
-npm publish --access public
+node ./scripts/build.mjs
+node ./scripts/prebuild.mjs
+npm pack --ignore-scripts
 ```
+
+For GitHub Packages, publish from a workspace whose package name has been rewritten to `@mukea-org/uiohook-napi`, matching the CI workflow's `npm pkg set` step.
+For prerelease versions such as `2.0.0-alpha4`, publish with a non-`latest` dist-tag such as `--tag alpha`.
 
 ## CI expectations
 
 - Build prebuilt binaries for supported platforms and architectures.
-- Verify the packed tarball contains `dist/` and `prebuilds/`.
-- Verify the package loads without running install-time native compilation.
-- Verify the package can load with `PREBUILDS_ONLY=1`.
+- Verify the package workspace can load the native binding.
+- Verify the package can be packed with `dist/` and `prebuilds/`.
 
 ## Before publishing
 

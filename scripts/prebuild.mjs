@@ -1,21 +1,45 @@
+import { copyFile, mkdir, rm } from 'node:fs/promises'
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 
 const rootDir = process.cwd()
+const platform = process.env.npm_config_platform || process.platform
+const arch = process.env.npm_config_arch || process.arch
+const tuple = `${platform}-${arch}`
+const prebuildDir = path.join(rootDir, 'prebuilds', tuple)
+const sourceCandidates = [
+  path.join(rootDir, 'build', 'Release', 'uiohook_napi.node'),
+  path.join(rootDir, 'build', 'Debug', 'uiohook_napi.node')
+]
+
+const libcTag = platform === 'linux'
+  ? (existsSync('/etc/alpine-release') ? 'musl' : 'glibc')
+  : null
+
+const outputFile = libcTag == null ? 'node.napi.node' : `node.napi.${libcTag}.node`
 const cmakeJsEntrypoint = path.join(rootDir, 'node_modules', 'cmake-js', 'bin', 'cmake-js')
-const args = process.argv.slice(2)
+const buildResult = process.platform === 'win32'
+  ? runCmakeJsOnWindows(['build'])
+  : runCmakeJsDirect(['build'])
 
-const result = process.platform === 'win32'
-  ? runOnWindows(args)
-  : runDirect(args)
-
-if (result.status !== 0) {
-  process.exit(result.status ?? 1)
+if (buildResult.status !== 0) {
+  process.exit(buildResult.status ?? 1)
 }
 
-function runDirect(args) {
+const builtFile = sourceCandidates.find(file => existsSync(file))
+if (builtFile == null) {
+  throw new Error(`Could not find built addon in any expected location: ${sourceCandidates.join(', ')}`)
+}
+
+await rm(prebuildDir, { recursive: true, force: true })
+await mkdir(prebuildDir, { recursive: true })
+await copyFile(builtFile, path.join(prebuildDir, outputFile))
+
+console.log(`Staged prebuild ${path.relative(rootDir, builtFile)} -> prebuilds/${tuple}/${outputFile}`)
+
+function runCmakeJsDirect (args) {
   return spawnSync(process.execPath, [cmakeJsEntrypoint, ...args], {
     cwd: rootDir,
     env: process.env,
@@ -23,9 +47,9 @@ function runDirect(args) {
   })
 }
 
-function runOnWindows(args) {
+function runCmakeJsOnWindows (args) {
   if (hasCommand('cmake')) {
-    return runDirect(args)
+    return runCmakeJsDirect(args)
   }
 
   const toolchain = detectVisualStudioToolchain()
@@ -61,7 +85,7 @@ function runOnWindows(args) {
   }
 }
 
-function detectVisualStudioToolchain() {
+function detectVisualStudioToolchain () {
   const vswhere = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe'
   if (!existsSync(vswhere)) {
     return null
@@ -97,7 +121,7 @@ function detectVisualStudioToolchain() {
   return { vcvars64, cmakeBin, ninjaDir }
 }
 
-function hasCommand(command) {
+function hasCommand (command) {
   const probe = spawnSync(command, ['--version'], {
     cwd: rootDir,
     env: process.env,
@@ -106,7 +130,7 @@ function hasCommand(command) {
   return probe.status === 0
 }
 
-function quoteForCmd(value) {
+function quoteForCmd (value) {
   if (value.length === 0) {
     return '""'
   }

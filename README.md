@@ -33,7 +33,7 @@ npm install @mukea-org/uiohook-napi
 Unsupported install method:
 
 ```bash
-npm install github:mukea-org/uiohook-napi#v2.0.0-alpha3
+npm install github:mukea-org/uiohook-napi#v2.0.0-alpha4
 ```
 
 Git URL installs fetch the repository snapshot at that tag, not the published registry tarball. That snapshot does not include generated `dist/` or bundled `prebuilds/`, so it is not a supported consumer path.
@@ -42,11 +42,17 @@ For day-to-day work:
 
 ```powershell
 pnpm install --ignore-scripts
-pnpm build
 pnpm dev
 ```
 
-`pnpm build` produces the published JS output under `dist/`. `pnpm dev` builds the local native addon and starts the interactive hook listener for development and testing on Windows, Linux, and macOS. The native build is CMake-driven through `cmake-js`. See [development.md](./docs/development.md) for local setup and [UPSTREAM.md](./UPSTREAM.md) for vendored `uiohook` maintenance rules.
+Maintainer-only direct build steps:
+
+```powershell
+node ./scripts/build.mjs
+node ./scripts/prebuild.mjs
+```
+
+`node ./scripts/build.mjs` produces the published JS output under `dist/`. `node ./scripts/prebuild.mjs` builds and stages the native addon under `prebuilds/`. `pnpm dev` runs both steps and then starts the interactive hook listener for development and testing on Windows, Linux, and macOS. The native build is CMake-driven through `cmake-js`. See [development.md](./docs/development.md) for local setup and [UPSTREAM.md](./UPSTREAM.md) for vendored `uiohook` maintenance rules.
 
 ## Usage example
 

@@ -47,23 +47,14 @@ sudo npm install -g pnpm@10.25.0
 
 ```powershell
 pnpm install --ignore-scripts
-pnpm build
 pnpm dev
 ```
 
-Daily commands:
+Direct build commands:
 
 ```powershell
-pnpm build
-pnpm dev
-```
-
-Release-only internal commands:
-
-```powershell
-node ./scripts/run-cmake-js.mjs build
-node ./scripts/build-prebuild.mjs
-node ./scripts/verify-prebuilds.mjs
+node ./scripts/build.mjs
+node ./scripts/prebuild.mjs
 ```
 
 `pnpm dev` prints `keydown`, `keypress`, and `keyup` events as you press keys.
