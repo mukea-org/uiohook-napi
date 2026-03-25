@@ -7,6 +7,6 @@
     "test": "node ./index.cjs"
   },
   "dependencies": {
-    "@mukea-org/uiohook-napi": "2.0.0-alpha5"
+    "@mukea-org/uiohook-napi": "2.0.0"
   }
 }

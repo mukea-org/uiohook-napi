@@ -33,7 +33,7 @@ npm install @mukea-org/uiohook-napi
 Unsupported install method:
 
 ```bash
-npm install github:mukea-org/uiohook-napi#v2.0.0-alpha5
+npm install github:mukea-org/uiohook-napi#v2.0.0
 ```
 
 Git URL installs fetch the repository snapshot at that tag, not the published registry tarball. That snapshot does not include generated `dist/` or bundled `prebuilds/`, so it is not a supported consumer path.
