@@ -30,7 +30,7 @@ npm pack --ignore-scripts
 ```
 
 For GitHub Packages, publish from a workspace whose package name has been rewritten to `@mukea-org/uiohook-napi`, matching the CI workflow's `npm pkg set` step.
-For prerelease versions such as `2.0.0-alpha4`, publish with a non-`latest` dist-tag such as `--tag alpha`.
+For prerelease versions such as `2.0.0-alpha5`, publish with a non-`latest` dist-tag such as `--tag alpha`.
 
 ## CI expectations
 

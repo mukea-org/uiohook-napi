@@ -1,12 +1,12 @@
 {
   "name": "@mukea/uiohook-napi",
-  "version": "2.0.0-alpha4",
+  "version": "2.0.0-alpha5",
   "author": {
     "name": "mukea.cc"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mukea-org/uiohook-napi"
+    "url": "git+https://github.com/mukea-org/uiohook-napi.git"
   },
   "license": "MIT",
   "keywords": [

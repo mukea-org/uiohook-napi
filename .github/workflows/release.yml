@@ -227,8 +227,7 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       contents: read
-    env:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -237,7 +236,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - name: Determine publish tag
@@ -246,15 +245,5 @@ jobs:
           publish_tag=$(node -p "const version = require('./package.json').version; const prerelease = version.split('-', 2)[1]; prerelease ? prerelease.split('.')[0] : 'latest'")
           echo "PUBLISH_TAG=$publish_tag" >> "$GITHUB_ENV"
 
-      - name: Explain npmjs publish skip
-        if: env.NPM_TOKEN == ''
-        shell: bash
-        run: |
-          echo "NPM_TOKEN is not configured."
-          echo "Skipping npmjs publish for $GITHUB_REF_NAME."
-
       - name: Publish to npmjs
-        if: env.NPM_TOKEN != ''
         run: npm publish --access public --tag "$PUBLISH_TAG"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -10,6 +10,6 @@ This sample is for consuming the GitHub Packages variant of this project:
 Create `.npmrc` from `.npmrc.example`, provide `NODE_AUTH_TOKEN`, then install:
 
 ```powershell
-npm install @mukea-org/uiohook-napi@2.0.0-alpha4
+npm install @mukea-org/uiohook-napi@2.0.0-alpha5
 npm test
 ```
